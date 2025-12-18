@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Informasi - Komunitas Desa</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --primary: #28a745;
+      --light-bg: #f0f8f0;
+    }
+    body { background-color: var(--light-bg); font-family: 'Segoe UI', sans-serif; }
+    .navbar-brand { font-weight: 700; color: var(--primary) !important; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .map-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .map-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+    .map-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    footer { background: #343a40; color: white; padding: 2rem 0; margin-top: 3rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">PENGADUAN DESA TIMBANGREJA</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="info.html">Informasi</a></li>
+            <li class="nav-item"><a class="nav-link" href="pengaduan.html">Pengaduan</a></li>
+            <li class="nav-item"><a class="nav-link" href="tracking.html">Lacak Pengaduan</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="admin-login.html">🔐 Admin</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container py-5">
+    <h2 class="mb-4">Berita & Informasi Komunitas</h2>
+    
+    <!-- Daftar Berita (Dinamis) -->
+    <div id="news-list" class="row">
+      <!-- Berita akan dimuat di sini -->
+    </div>
+
+    <!-- Lokasi Desa -->
+    <h3 class="mt-5 mb-3">Lokasi Desa Timbangreja</h3>
+    <div class="map-card" onclick="openGoogleMaps()">
+      <img src="https://placehold.co/600x200/e8f5e9/28a745?text=Lokasi+Desa+Timbangreja" class="map-img" alt="Lokasi Desa Timbangreja">
+      <div class="p-3">
+        <h5 class="mb-1">Buka di Google Maps</h5>
+        <p class="text-muted small">Klik untuk melihat lokasi di Google Maps</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-dark text-white text-center py-4 mt-5">
+    <div class="container">
+      <p>&copy; 2025 Komunitas Desa</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Buka Google Maps ke lokasi spesifik
+    function openGoogleMaps() {
+      window.open('https://maps.app.goo.gl/W81GJayJArApfRW46', '_blank');
+    }
+
+    // Muat berita dari localStorage
+    function loadNews() {
+      const newsList = document.getElementById('news-list');
+      const news = JSON.parse(localStorage.getItem('communityNews') || '[]');
+      
+      if (news.length === 0) {
+        // Data default (jika belum ada)
+        const defaultNews = [
+          { title: "Pembangunan Jalan Dusun Selatan", content: "Proyek pengaspalan jalan sepanjang 2 km akan dimulai bulan depan...", date: "10 Des 2025" },
+          { title: "Pelatihan Pertanian Organik", content: "Dinas Pertanian mengadakan pelatihan gratis untuk petani lokal...", date: "5 Des 2025" }
+        ];
+        localStorage.setItem('communityNews', JSON.stringify(defaultNews));
+        renderNews(defaultNews);
+      } else {
+        renderNews(news);
+      }
+    }
+
+    function renderNews(news) {
+      let html = '';
+      news.forEach(item => {
+        html += `
+          <div class="col-md-6 mb-4">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">${item.title}</h5>
+                <p class="card-text">${item.content}</p>
+                <small class="text-muted">${item.date}</small>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('news-list').innerHTML = html;
+    }
+
+    // Jalankan saat halaman dimuat
+    loadNews();
+  </script>
+</body>
+</html>

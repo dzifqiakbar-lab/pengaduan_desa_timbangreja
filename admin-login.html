@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login Admin - Desa Timbangreja</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #28a745;
+      --primary-dark: #218838;
+      --light-bg: #f0f8f0;
+    }
+    body {
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      max-width: 420px;
+      width: 100%;
+      padding: 2.5rem;
+    }
+    .login-card h2 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    .form-control {
+      border: 1px solid #ced4da;
+      border-radius: 10px;
+      padding: 10px 15px;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    .btn-login {
+      background-color: var(--primary);
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-weight: 600;
+      width: 100%;
+    }
+    .btn-login:hover {
+      background-color: var(--primary-dark);
+    }
+    .logo-text {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .logo-text h1 {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+    .footer-note {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="login-card">
+      <div class="logo-text">
+        <h1>Desa Timbangreja</h1>
+        <p>Kec. Lebaksiu, Kab. Tegal</p>
+      </div>
+      
+      <h2>Login Admin</h2>
+      
+      <form id="adminLoginForm">
+        <div class="mb-3">
+          <label for="email" class="form-label">Email Admin</label>
+          <input 
+            type="email" 
+            class="form-control" 
+            id="email" 
+            placeholder="admin@gmail.com" 
+            required
+          >
+        </div>
+        <div class="mb-4">
+          <label for="password" class="form-label">Password</label>
+          <input 
+            type="password" 
+            class="form-control" 
+            id="password" 
+            placeholder="**********" 
+            required
+          >
+        </div>
+        <button type="submit" class="btn-login">Masuk ke Panel Admin</button>
+      </form>
+
+      <div class="footer-note">
+        <small>Hanya untuk pengguna terotorisasi</small>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_EMAIL = "admin@gmail.com";
+    const ADMIN_PASSWORD = "admin123";
+
+    document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        sessionStorage.setItem('isAdminLoggedIn', 'true');
+        alert('✅ Login berhasil! Mengalihkan ke panel admin...');
+        window.location.href = 'admin.html';
+      } else {
+        alert('❌ Email atau password salah!');
+        document.getElementById('password').value = '';
+      }
+    });
+  </script>
+
+</body>
+</html>

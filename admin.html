@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Desa Timbangreja</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --primary: #28a745;
+      --primary-dark: #218838;
+      --info: #17a2b8;
+      --warning: #ffc107;
+      --success: #28a745;
+      --light-bg: #f0f8f0;
+    }
+    body {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      font-family: 'Segoe UI', sans-serif;
+      padding-top: 70px;
+    }
+    .navbar {
+      background: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+    .navbar-brand {
+      font-weight: 800;
+      color: var(--primary) !important;
+    }
+    .card {
+      border: none;
+      border-radius: 18px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      background: white;
+      transition: transform 0.3s;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    }
+    .status-badge {
+      padding: 0.5rem 1.1rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .status-new { background: rgba(23, 162, 184, 0.15); color: var(--info); }
+    .status-progress { background: rgba(255, 193, 7, 0.15); color: #d39e00; }
+    .status-done { background: rgba(40, 167, 69, 0.15); color: var(--success); }
+    .complaint-photo-thumb {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin: 1rem 0;
+    }
+    .contact-box {
+      background: #f8f9fa;
+      padding: 0.8rem;
+      border-radius: 10px;
+      margin: 0.8rem 0;
+      border-left: 3px solid var(--info);
+      font-size: 0.9rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: #6c757d;
+    }
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1.2rem;
+      color: #e9ecef;
+    }
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 768px) {
+      .header-actions {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-actions .btn,
+      .header-actions select {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand">
+    <div class="container">
+      <span class="navbar-brand">ADMIN - DESA TIMBANGREJA</span>
+      <button class="btn btn-outline-danger btn-sm" onclick="logout()">Keluar</button>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <!-- Header: Pengaduan + Kelola Informasi Sejajar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+      <h2 class="text-success fw-bold">📮 Manajemen Pengaduan</h2>
+      <div class="header-actions">
+        <select id="status-filter" class="form-select" style="width:auto;" onchange="filterComplaints()">
+          <option value="all">Semua Status</option>
+          <option value="Diterima">📥 Laporan Masuk</option>
+          <option value="Sedang Diproses">🔄 Sedang Diproses</option>
+          <option value="Dalam Pengerjaan">🛠️ Dalam Pengerjaan</option>
+          <option value="Selesai">✅ Laporan Selesai</option>
+        </select>
+        <span class="badge bg-primary">Total: <span id="total-count">0</span></span>
+        <button class="btn btn-success" onclick="addNewsItem()">+ Kelola Informasi</button>
+      </div>
+    </div>
+
+    <!-- Daftar Pengaduan -->
+    <div class="row mb-5" id="complaints-list">
+      <!-- Daftar pengaduan -->
+    </div>
+
+    <!-- Bagian Kelola Informasi -->
+    <div id="news-section" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-success fw-bold">📰 Kelola Informasi Desa</h2>
+        <button class="btn btn-secondary" onclick="document.getElementById('news-section').style.display='none'">Tutup</button>
+      </div>
+      <div id="news-management">
+        <!-- Daftar berita -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detail Pengaduan -->
+  <div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Detail Pengaduan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modal-content"></div>
+        <div class="modal-footer">
+          <select id="status-update" class="form-select" style="width:auto; margin-right:10px;">
+            <option value="Diterima">📥 Laporan Masuk</option>
+            <option value="Sedang Diproses">🔄 Sedang Diproses</option>
+            <option value="Dalam Pengerjaan">🛠️ Dalam Pengerjaan</option>
+            <option value="Selesai">✅ Laporan Selesai</option>
+            <option value="hapus">🗑️ Hapus Laporan</option>
+          </select>
+          <button type="button" class="btn btn-success" onclick="updateStatusFromModal()">Simpan</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Cek login
+    if (!sessionStorage.getItem('isAdminLoggedIn')) {
+      alert('Akses ditolak! Silakan login.');
+      window.location.href = 'admin-login.html';
+    }
+
+    function logout() {
+      sessionStorage.removeItem('isAdminLoggedIn');
+      window.location.href = 'index.html';
+    }
+
+    // === MANAJEMEN PENGADUAN ===
+    function openDetail(index) {
+      const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+      const c = complaints[index];
+
+      // ✅ PERBAIKAN: Pastikan description adalah string
+      const description = typeof c.description === 'string' ? c.description : 'Tidak ada deskripsi';
+
+      document.getElementById('modal-content').innerHTML = `
+        <p><strong>ID Pengaduan:</strong> ${c.id}</p>
+        <p><strong>Waktu:</strong> ${c.timestamp}</p>
+        ${c.foto ? `<div class="text-center mb-3"><img src="${c.foto}" class="img-fluid" style="max-height:400px; object-fit:contain; border-radius:8px;"></div>` : ''}
+        <p><strong>Deskripsi Masalah:</strong></p>
+        <p>${description}</p>
+        <div class="mt-3 p-3 bg-light rounded">
+          <h6>Kontak Pelapor:</h6>
+          <p><i class="bi bi-envelope me-2"></i> ${c.email || '–'}</p>
+          <p><i class="bi bi-telephone me-2"></i> ${c.nohp || '–'}</p>
+        </div>
+      `;
+
+      document.getElementById('status-update').value = c.status;
+      window.currentComplaintIndex = index;
+      new bootstrap.Modal(document.getElementById('detailModal')).show();
+    }
+
+    function updateStatusFromModal() {
+      const index = window.currentComplaintIndex;
+      const action = document.getElementById('status-update').value;
+      const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+
+      if (action === 'hapus') {
+        if (confirm('⚠️ Hapus laporan ini? Tindakan ini tidak bisa dikembalikan.')) {
+          complaints.splice(index, 1);
+          localStorage.setItem('complaints', JSON.stringify(complaints));
+          bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+          renderComplaints();
+          showToast('🗑️ Laporan berhasil dihapus!');
+        }
+      } else {
+        complaints[index].status = action;
+        localStorage.setItem('complaints', JSON.stringify(complaints));
+        bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+        renderComplaints();
+        showToast(`✅ Status diubah menjadi: ${action}`);
+      }
+    }
+
+    function renderComplaints() {
+      const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+      const container = document.getElementById('complaints-list');
+      document.getElementById('total-count').textContent = complaints.length;
+
+      const filter = document.getElementById('status-filter').value;
+      let filtered = filter === 'all' ? complaints : complaints.filter(c => c.status === filter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-12"><div class="empty-state"><i class="bi bi-inbox"></i><h3>Tidak ada pengaduan</h3><p>${filter === 'all' ? 'Belum ada pengaduan.' : `Tidak ada pengaduan dengan status "${filter}".`}</p></div></div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((c, i) => {
+        const originalIndex = complaints.findIndex(item => item.id === c.id);
+        let statusClass = '', statusText = '';
+        if (c.status === 'Diterima') {
+          statusClass = 'status-new';
+          statusText = '📥 Laporan Masuk';
+        } else if (c.status === 'Sedang Diproses') {
+          statusClass = 'status-progress';
+          statusText = '🔄 Sedang Diproses';
+        } else if (c.status === 'Dalam Pengerjaan') {
+          statusClass = 'status-progress';
+          statusText = '🛠️ Dalam Pengerjaan';
+        } else {
+          statusClass = 'status-done';
+          statusText = '✅ Laporan Selesai';
+        }
+
+        // ✅ Pastikan description string di sini juga
+        const desc = typeof c.description === 'string' ? c.description : 'Tidak ada deskripsi';
+
+        html += `
+          <div class="col-12 col-md-6 col-lg-4 mb-4">
+            <div class="card h-100" onclick="openDetail(${originalIndex})" style="cursor:pointer;">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <strong class="text-muted">#${c.id}</strong>
+                  <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+                ${c.foto ? `<img src="${c.foto}" class="complaint-photo-thumb" alt="Foto">` : ''}
+                <p class="text-muted flex-grow-1 mb-2">${desc.length > 80 ? desc.substring(0, 80) + '...' : desc}</p>
+                ${(c.email || c.nohp) ? `
+                  <div class="contact-box">
+                    <p class="mb-1"><i class="bi bi-envelope me-1"></i> ${c.email || '–'}</p>
+                    <p class="mb-0"><i class="bi bi-telephone me-1"></i> ${c.nohp || '–'}</p>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function filterComplaints() {
+      renderComplaints();
+    }
+
+    // === MANAJEMEN BERITA ===
+    function loadNewsManagement() {
+      const news = JSON.parse(localStorage.getItem('communityNews') || '[]');
+      let html = '';
+      if (news.length === 0) {
+        html = '<div class="alert alert-info">Belum ada berita. Tambah berita baru untuk memulai.</div>';
+      } else {
+        news.forEach((item, index) => {
+          html += `
+            <div class="card mb-3">
+              <div class="card-body">
+                <input type="text" class="form-control mb-2" value="${item.title}" id="news-title-${index}" placeholder="Judul berita">
+                <textarea class="form-control mb-2" rows="3" id="news-content-${index}" placeholder="Isi berita">${item.content}</textarea>
+                <input type="text" class="form-control mb-2" value="${item.date}" id="news-date-${index}" placeholder="Contoh: 10 Des 2025">
+                <div class="d-flex gap-2">
+                  <button class="btn btn-primary btn-sm" onclick="saveNewsItem(${index})">Simpan</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteNewsItem(${index})">Hapus</button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+      document.getElementById('news-management').innerHTML = html;
+      document.getElementById('news-section').style.display = 'block';
+    }
+
+    function addNewsItem() {
+      const news = JSON.parse(localStorage.getItem('communityNews') || '[]');
+      const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      news.push({ title: 'Judul Baru', content: 'Isi berita...', date: today });
+      localStorage.setItem('communityNews', JSON.stringify(news));
+      loadNewsManagement();
+    }
+
+    function saveNewsItem(index) {
+      const news = JSON.parse(localStorage.getItem('communityNews') || '[]');
+      news[index] = {
+        title: document.getElementById(`news-title-${index}`).value,
+        content: document.getElementById(`news-content-${index}`).value,
+        date: document.getElementById(`news-date-${index}`).value
+      };
+      localStorage.setItem('communityNews', JSON.stringify(news));
+      showToast('✅ Berita berhasil disimpan!');
+    }
+
+    function deleteNewsItem(index) {
+      if (!confirm('Hapus berita ini?')) return;
+      const news = JSON.parse(localStorage.getItem('communityNews') || '[]');
+      news.splice(index, 1);
+      localStorage.setItem('communityNews', JSON.stringify(news));
+      loadNewsManagement();
+      showToast('🗑️ Berita dihapus!');
+    }
+
+    // Notifikasi
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.innerHTML = `<div class="toast show" style="position:fixed;top:80px;right:20px;z-index:10000;background:white;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:12px;padding:12px 20px;font-weight:bold;">${message}</div>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    }
+
+    // Jalankan saat halaman dimuat
+    renderComplaints();
+  </script>
+</body>
+</html>
